@@ -1,0 +1,154 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2638
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fnil\fcharset0 .AppleSystemUIFontMonospaced-Regular;\f2\fnil\fcharset0 Menlo-Bold;
+\f3\fnil\fcharset0 Menlo-Regular;\f4\fswiss\fcharset0 Helvetica-Bold;}
+{\colortbl;\red255\green255\blue255;\red203\green35\blue57;\red255\green255\blue255;\red27\green31\blue35;
+\red0\green0\blue0;\red255\green255\blue255;\red252\green107\blue170;\red24\green23\blue27;\red255\green255\blue255;
+\red93\green216\blue255;\red222\green193\blue255;\red66\green184\blue224;\red208\green188\blue86;\red192\green138\blue255;
+}
+{\*\expandedcolortbl;;\cssrgb\c84314\c22745\c28627;\cssrgb\c100000\c100000\c100000;\cssrgb\c14118\c16078\c18431;
+\cssrgb\c0\c1\c1;\cssrgb\c100000\c100000\c99985;\csgenericrgb\c98896\c42114\c66499;\csgenericrgb\c9220\c9172\c10609;\csgenericrgb\c100000\c100000\c100000;
+\csgenericrgb\c36471\c84706\c100000;\csgenericrgb\c87028\c75839\c99946;\csgenericrgb\c25859\c71980\c87708;\csgenericrgb\c81473\c73653\c33549;\csgenericrgb\c75482\c53948\c99907;
+}
+\paperw11900\paperh16840\margl1440\margr1440\vieww27540\viewh19000\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 \
+View\'92s  State = View\'92s Value ie, views value changes with each state change \
+But swift UI keeps the identity of a view using explicit and structural identity techniques \
+Life time of a view is the duration of the identity of the view.\
+\
+StateLifetime = View Life time\
+\
+Persistence of data is tied to LIFETIME\
+You are in control of the identity of yours views and we can identity to scope the life time of the state\
+\
+
+\fs28 SwiftUI:\
+Weather App :  Sapcer().frame(\'85.) - Sapcer can be controlled !! \
+\
+Stack.frame(maxWidth: Infinity, maxHeight:Infinity) - To give background colour for a view\
+\
+Async Await & throw function\
+\
+{\field{\*\fldinst{HYPERLINK "https://dimillian.medium.com/on-ios-architecture-7718af481fad"}}{\fldrslt https://dimillian.medium.com/on-ios-architecture-7718af481fad}}\
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrt\brdrnil \trbrdrl\brdrnil \trbrdrt\brdrnil \trbrdrr\brdrnil 
+\clvertalt \clshdrawnil \clwWidth16913\clftsWidth3 \clheight4190 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl200 \clpadb20 \clpadr200 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f1\fs36 \cf2 \cb3 \expnd0\expndtw0\kerning0
+var\cf4  router: (NSObjectProtocol \cf2 &\cf4  RocketsRoutingLogic \cf2 &\cf4  RocketsDataPassing)\cf2 ?\
+\
+\cf5 \cb6 \'93For an object to be an observed object, it has to be held by another object through out the ie, we can\'92t create a an observed object evrytime to update the UI\'94\
+\
+\'93\'93updateUI\'94 OF UIViewRepresetable is called when its state object is changed\'94 \
+\
+
+\fs48 Include Grid view ???????\
+\
+\
+Testing VCs - Test behaviours -> When a particular state changed, what changes is happening in VC like some view is hidden, some text changed etc. is hidden\
+\
+Functions are first class citizens - It can be injected as a dependancy \
+\
+If an class is singleton with private init, we can still inject a mock by making the class confirming to a protocol \
+\
+Functional programming - What to do, immutable\
+Imperative programming - How to do, step by step, mutable\
+
+\f0\fs24 \cf0 \cb1 \kerning1\expnd0\expndtw0 \cell \lastrow\row
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+\cf0 {{\NeXTGraphic IMG_6736.HEIC \width7500 \height10000 \appleattachmentpadding0 \appleembedtype0 \appleaqc
+}¬}\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+\cf0   \'97\'97> 
+\fs32 we can only have Bool  chess inside a view no other statements. Those are to be done in tap gesture, button action, snapper, .task etc.
+\fs24 \
+\
+\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f2\b \cf7 \cb8 enum
+\f3\b0 \cf9  \cf10 MyError\cf9 : \cf11 Error\cf9  \{\
+\pard\tx593\pardeftab593\pardirnatural\partightenfactor0
+\cf9     
+\f2\b \cf7 case
+\f3\b0 \cf9  \cf12 stammer\cf9 ,\
+     \cf12 short\cf9 \
+\}\
+\
+
+\f2\b \cf7 func
+\f3\b0 \cf9  \cf12 doSomething\cf9 (\cf12 param\cf9 : \cf11 Int\cf9 ) 
+\f2\b \cf7 async
+\f3\b0 \cf9  
+\f2\b \cf7 throws
+\f3\b0 \cf9  -> \cf11 Int\cf9  \{\
+    
+\f2\b \cf7 if
+\f3\b0 \cf9  param > \cf13 10\cf9  \{\
+        
+\f2\b \cf7 return
+\f3\b0 \cf9  param\
+    \} 
+\f2\b \cf7 else
+\f3\b0 \cf9  \{\
+        
+\f2\b \cf7 throw
+\f3\b0 \cf9  MyError.stammer\
+    \}\
+\}\
+\
+
+\f2\b \cf7 func
+\f3\b0 \cf9  \cf12 callRandom\cf9 () 
+\f2\b \cf7 async
+\f3\b0 \cf9  \{\
+    
+\f2\b \cf7 do
+\f3\b0 \cf9  \{\
+       
+\f2\b \cf7 let
+\f3\b0 \cf9  val = 
+\f2\b \cf7 try
+\f3\b0 \cf9  
+\f2\b \cf7 await
+\f3\b0 \cf9  doSomething(param: \cf13 6\cf9 )\
+    \} 
+\f2\b \cf7 catch
+\f3\b0 \cf9  \{\
+        \cf14 print\cf9 (\cf14 error\cf9 ) // This will print stammer\
+    \}\
+\}\
+\
+\
+\
+\
+
+\f2\b\fs28 ListView with Navigation view and toolbar button & Presenter (Breed Fetcher). Presenter is maintaining 3 states but not all used here in the view\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\f0\b0\fs24 \cf0 \cb1 {{\NeXTGraphic Screenshot 2022-05-30 at 11.22.27 PM.png \width15510 \height15000 \appleattachmentpadding0 \appleembedtype0 \appleaqc
+}¬}\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+\cf0 \
+\
+\cb5 \
+\cf3 \
+
+\f4\b\fs28 Row view
+\f0\b0\fs24 \cf5 \
+\cf0 \cb1 \
+\
+{{\NeXTGraphic Screenshot 2022-05-30 at 11.29.05 PM.png \width23040 \height14320 \appleattachmentpadding0 \appleembedtype0 \appleaqc
+}¬}
+\f3 \cf9 \cb8 \
+\pard\tx593\pardeftab593\pardirnatural\partightenfactor0
+\cf9 \
+\
+\
+\
+
+\f2\b\fs28 View checking the states from two different managers and rendering accordingly \
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\f0\b0\fs24 \cf0 \cb1 {{\NeXTGraphic Screenshot 2022-05-30 at 4.31.27 PM.png \width22040 \height15700 \appleattachmentpadding0 \appleembedtype0 \appleaqc
+}¬}}
