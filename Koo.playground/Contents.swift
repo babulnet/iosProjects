@@ -7,47 +7,86 @@ PlaygroundPage.current.needsIndefiniteExecution = true
 
 var greeting = "Hello, playground"
 
+class AsyncOperation: Operation {
+    enum State: String {
+        case isReady
+        case isExecuting
+        case isFinished
+    }
+    
+    var state: State = .isReady {
+        willSet (newValue) {
+            willChangeValue(forKey: state.rawValue)
+            willChangeValue(forKey: newValue.rawValue)
+        }
+        didSet {
+            didChangeValue(forKey: oldValue.rawValue)
+            didChangeValue (forKey: state.rawValue)
+        }
+    }
+    
+    override var isAsynchronous: Bool { true }
+    override var isExecuting: Bool { state == .isExecuting }
+    override var isFinished: Bool {
+        if isCancelled && state != .isExecuting {return true}
+        return state == .isFinished
+    }
+    
+    override func start() {
+        guard !isCancelled else {
+            state = .isFinished
+            return
+        }
+        state = .isExecuting
+        main()
+    }
+    override func cancel () {
+        state = .isFinished
+    }
+}
+
+
 class Man {
     var height: Int = 0
 }
 
-class CustomDispatchGroup {
-    let lock = NSLock()
-    private var count = 0
-    private var leaveCount = 0
-    private  var completion: (()->())? = nil
-    private var man = Man()
- 
-     func enter() {
-       // lock.lock()
-        print("count before", count)
-        man.height += 1
-        print(count)
-        //lock.unlock()
-    }
-    
-     func leave() {
-      //  lock.lock()
-        man.height -= 1
-       
-        if man.height == 0 {
-            guard let completion = completion else {return}
-            completion()
-        }
-       // lock.unlock()
-    }
-    
-    func notify(_ done : @escaping()->()) {
-        completion = done
-    }
-}
+//class CustomDispatchGroup {
+//    let lock = NSLock()
+//    private var count = 0
+//    private var leaveCount = 0
+//    private  var completion: (()->())? = nil
+//    private var man = Man()
+//
+//     func enter() {
+//       // lock.lock()
+//        print("count before", count)
+//        man.height += 1
+//        print(count)
+//        //lock.unlock()
+//    }
+//
+//     func leave() {
+//      //  lock.lock()
+//        man.height -= 1
+//
+//        if man.height == 0 {
+//            guard let completion = completion else {return}
+//            completion()
+//        }
+//       // lock.unlock()
+//    }
+//
+//    func notify(_ done : @escaping()->()) {
+//        completion = done
+//    }
+//}
 
 
-var cc = CustomDispatchGroup()
+//var cc = CustomDispatchGroup()
 
-cc.notify {
-    print("Done")
-}
+//cc.notify {
+//    print("Done")
+//}
 
 //cc.enter()
 //cc.enter()
@@ -75,70 +114,70 @@ cc.notify {
 
 // CustomNotificationCentre
 
-//class MyNotificationCentre {
-//    
-//    class Observer {
-//        var name: String = ""
-//        var completion: ([String:Any])->()
-//        
-//        init(name:String, completion:@escaping ([String:Any])->()) {
-//            self.name = name
-//            self.completion = completion
-//        }
-//    }
-//    
-//    class Notification {
-//        var name: String = ""
-//    }
-//    
-//    static let shared = MyNotificationCentre()
-//    
-//    var observerdictionary: [String:[Observer]] = [:]
-//    
-//    func addObserver(object: AnyObject, name: String, completion:@escaping ([String:Any])->()) {
-//       
-//        let className = String(describing: type(of: object))
-//       
-//        let newObserver = Observer(name: className, completion: completion)
-//        
-//        if let _ = observerdictionary[name] {
-//            observerdictionary[name]?.append(newObserver)
-//        } else {
-//            observerdictionary[name] = [newObserver]
-//        }
-//    }
-//    
-//    func post(name: String, info:[String:Any]) {
-//        if let observers = observerdictionary[name] {
-//            for item in observers {
-//                item.completion(info)
-//            }
-//        }
-//    }
-//    
-//    func remove(_ object: AnyObject, notificationName: String? = nil) {
-//        
-//        let className = String(describing: type(of: object))
-//        print("removing\(className)")
-//        print("dic before\(observerdictionary)")
-//
-//
-//        if let notificationName = notificationName {
-//            observerdictionary[notificationName]?.removeAll(where: { observer in
-//                observer.name == className
-//            })
-//        } else {
-//            observerdictionary =  observerdictionary.filter { item in
-//                item.value.contains { observer in
-//                    observer.name != className
-//                }
-//            }
-//        }
-//        
-//        print("after")
-//        print(observerdictionary)
-//    }
-//}
+class MyNotificationCentre {
+
+    class Observer {
+        var name: String = ""
+        var completion: ([String:Any])->()
+
+        init(name:String, completion:@escaping ([String:Any])->()) {
+            self.name = name
+            self.completion = completion
+        }
+    }
+
+    class Notification {
+        var name: String = ""
+    }
+
+    static let shared = MyNotificationCentre()
+
+    var observerdictionary: [String:[Observer]] = [:]
+
+    func addObserver(object: AnyObject, name: String, completion:@escaping ([String:Any])->()) {
+
+        let className = String(describing: type(of: object))
+
+        let newObserver = Observer(name: className, completion: completion)
+
+        if let _ = observerdictionary[name] {
+            observerdictionary[name]?.append(newObserver)
+        } else {
+            observerdictionary[name] = [newObserver]
+        }
+    }
+
+    func post(name: String, info:[String:Any]) {
+        if let observers = observerdictionary[name] {
+            for item in observers {
+                item.completion(info)
+            }
+        }
+    }
+    
+    func remove(_ object: AnyObject, notificationName: String? = nil) {
+        
+        let className = String(describing: type(of: object))
+        print("removing\(className)")
+        print("dic before\(observerdictionary)")
+
+
+        if let notificationName = notificationName {
+            observerdictionary[notificationName]?.removeAll(where: { observer in
+                observer.name == className
+            })
+        } else {
+            observerdictionary =  observerdictionary.filter { item in
+                item.value.contains { observer in
+                    observer.name != className
+                }
+            }
+        }
+        
+        print("after")
+        print(observerdictionary)
+    }
+}
 //
 //class CheckNoti {
 //    
@@ -282,8 +321,8 @@ class Concrrency {
     
     func checkQueueBehaviours() { //serial sync and async, concurrent sync and sync
         var value: Int = 20
-        let queue = DispatchQueue(label: "com.serial.babul")
-        //let queue = DispatchQueue(label: "com.serial.babul", attributes: .concurrent)
+        //let queue = DispatchQueue(label: "com.serial.babul")
+        let queue = DispatchQueue(label: "com.serial.babul", attributes: .concurrent)
 
         queue.sync {
             if Thread.isMainThread {
@@ -291,16 +330,22 @@ class Concrrency {
             } else {
                 print("Task is on OTHER thread")
             }
-            
+           
+//            queue.sync {
+//                for i in 10...20 {
+//                    value = i
+//                    print("\(value) 😁")
+//                }
+  //          }
             for i in (0...3) {
                 let imageURL = URL(string: "https://upload.wikimedia.org/wikipedia/commons/0/07/Huge_ball_at_Vilnius_center.jpg")!
-                
+
                 let _ = try! Data(contentsOf: imageURL)
                 print("\(i)  finished downloading")
             }
         }
         
-        queue.sync {
+        queue.async {
             for i in 0...3 {
                 value = i
                 print("\(value) 😁")
@@ -347,7 +392,7 @@ class Concrrency {
         }
         
         print("Apis started")
-        dispatchGroup.wait()
+        //dispatchGroup.wait()
 
         DispatchQueue.main.async {
             print("Api calls completed")
@@ -592,6 +637,16 @@ class Concrrency {
             queue.addOperation(operation2)
         }
         //Async call inside an operation -> When combile encouters and asyn call, it assumes that the operation is completed and mark the dependacy as resolved
+        
+        func doOperation5() {
+            let operation1 = PrintOperation(range: 0..<11)
+            let operation2 = PrintOperation(range: 11..<21)
+            let queue = OperationQueue()
+            operation2.addDependency(operation1)
+            queue.addOperation(operation1)
+            queue.addOperation(operation2)
+        }
+        
         private func printOnetoTen() {
             DispatchQueue.global().async { //if wrap it around an async Block, dependancy wont work and solution is to cretae a Custom Operation and manage states
                 for i in 1...10 {
@@ -610,7 +665,23 @@ class Concrrency {
     }
 }
 
-
+class PrintOperation: AsyncOperation {
+    private var array: [Int]
+   
+     init(range: Range<Int>) {
+        array = Array(range)
+    }
+    
+    override func main() {
+        DispatchQueue.global().async {
+            for i in self.array {
+                print(i)
+            }
+            
+            self.state = .isFinished
+        }
+    }
+}
 
 
 //Concrrency().checkConcurrency() // prints 4,5,6,0,1,2,3,9
@@ -625,7 +696,7 @@ class Concrrency {
 //let purchaser = Concrrency.DispatchBarrier()
 //purchaser.buttonClickedToBuy()
 let operation = Concrrency.Operations()
-//operation.doOperation4()
+operation.doOperation4()
 
 
 //https://www.youtube.com/watch?v=X9H2M7xMi9E&list=PLSbpzz0GJp5RTrjum9gWTqPhM4L3Kop0S - Video
@@ -858,3 +929,4 @@ let ans = str1.filter { char in
 }
 
 ans
+
