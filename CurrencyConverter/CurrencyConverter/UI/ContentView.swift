@@ -16,10 +16,11 @@ struct ConverterViewModel {
 }
 
 protocol ConverterViewDataProvider:ObservableObject {
-    func start()
+    func start(_ completion:((Bool)->())?)
     func convert(value:String?,amount:String)
     var convertItemModel:ConverterViewModel {get}
     var isLoading: Bool {get}
+    var error: Error?{get set}
 }
 
 // View is made generic as its completely agnostic about what its converting
@@ -76,9 +77,9 @@ struct ConverterView<T:ConverterViewDataProvider>: View where T:ObservableObject
                     .cornerRadius(10)
                 }.padding()
                 ListView(searchText: $searchText, filterdItems: filterdItems)
-            }
+            }.errorAlert(error: $presenter.error)
             .onAppear(perform: {
-                presenter.start()
+                presenter.start(nil)
             })
         }
     }
@@ -149,5 +150,31 @@ struct CustomPicker: View {
         }
     }
 }
-
                             
+extension View {
+    func errorAlert(error: Binding<Error?>, buttonTitle: String = "OK") -> some View {
+        let localizedAlertError = LocalizedAlertError(error: error.wrappedValue)
+        return alert(isPresented: .constant(localizedAlertError != nil), error: localizedAlertError) { _ in
+            Button(buttonTitle) {
+                error.wrappedValue = nil
+            }
+        } message: { error in
+            Text(error.recoverySuggestion ?? "")
+        }
+    }
+}
+
+struct LocalizedAlertError: LocalizedError {
+    let underlyingError: LocalizedError
+    var errorDescription: String? {
+        underlyingError.errorDescription
+    }
+    var recoverySuggestion: String? {
+        underlyingError.recoverySuggestion
+    }
+
+    init?(error: Error?) {
+        guard let localizedError = error as? LocalizedError else { return nil }
+        underlyingError = localizedError
+    }
+}

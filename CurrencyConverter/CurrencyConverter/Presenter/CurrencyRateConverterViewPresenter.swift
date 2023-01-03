@@ -10,7 +10,7 @@ import Combine
 import SwiftUI
 
 class CurrencyRateConverterViewPresenter: ObservableObject, ConverterViewDataProvider {
-    
+    @Published var error: Error?
     @Published var convertItemModel: ConverterViewModel = ConverterViewModel(title: "Select a currency to convert", subTitle: "Amount", itemsToConvert: [], convertedResult: [])
     @Published var isLoading = false
     var interactor: CurrencyConverterInteractorProtocol = CurrencyConverterInteractor()
@@ -19,14 +19,15 @@ class CurrencyRateConverterViewPresenter: ObservableObject, ConverterViewDataPro
     private  var currencyModel:CurrencyModel?
     private var currencyDic:[String:String] = [:]
     
-    func start() {
+    func start(_ completion:((Bool)->())? = nil) {
         self.getCountriesList { result in
             switch result {
             case true:
-                self.getData()
+                self.getData({_ in
+                    completion?(true)
+                })
             case false:
-                self.isLoading = false
-                print("error")
+               completion?(false)
             }
         }
     }
@@ -40,21 +41,20 @@ class CurrencyRateConverterViewPresenter: ObservableObject, ConverterViewDataPro
         self.convertItemModel.convertedResult = self.currencyModel?.rates.map {"\($0)  - \(String(format: "%0.1f", $1))"}.sorted(by: <) ?? []
     }
     
-    private func getData() {
+    private func getData(_ completion:((Bool)->())? = nil) {
         interactor.getCurrencyRate(for: "") { result in
             switch result {
             case .success(let model):
                 self.currencyModel = model
                 DispatchQueue.main.async {
                     self.convertItemModel.convertedResult = model.rates.map {"\($0)  - \($1)"}
+                    completion?(true)
                 }
-                print(model.base)
             case .failure(let error):
-                print(error)
-            }
-            
-            DispatchQueue.main.async {
-                self.isLoading = false
+                DispatchQueue.main.async {
+                    self.error = error
+                    completion?(false)
+                }
             }
         }
     }
@@ -68,8 +68,8 @@ class CurrencyRateConverterViewPresenter: ObservableObject, ConverterViewDataPro
                     completion?(true)
                 }
             case .failure(let error):
+                self.error = error
                 completion?(false)
-                print(error)
             }
         })
     }
