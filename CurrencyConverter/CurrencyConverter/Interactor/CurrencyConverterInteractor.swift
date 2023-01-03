@@ -18,12 +18,13 @@ class CurrencyConverterInteractor {
  
     let url = "https://openexchangerates.org/api/"
     let appId = "37e60c4ce41f454dbce1efe06609d8e8"
-    var urlSession = URLSession.shared
+    var urlSession: URLSessionProtocol = URLSession.shared
     var base:String
     var amount:Double
-    private var timer = Timer.publish(every: 10, on: RunLoop.main, in: .common).autoconnect()
+    private var timer = Timer.publish(every: 5, on: RunLoop.main, in: .common).autoconnect()
     private var anyCancellables:[AnyCancellable] = []
     var storage:LocalStorageProtocol = LocalStorage()
+    var errorEmitter = PassthroughSubject<Error,Never>()
    
     init(base: String = "USD",amount: Double = 1) {
         self.base = base
@@ -35,12 +36,19 @@ class CurrencyConverterInteractor {
         timer.sink { error in
             print(error)
         } receiveValue: { _ in
-            self.fetchCurrencyRate()
+            self.fetchCurrencyRate { result in
+                switch result {
+                case .success(_):
+                    print("")
+                case .failure(let error):
+                    self.errorEmitter.send(error)
+                }
+            }
         }
         .store(in: &anyCancellables)
     }
     
-    private func fetchCurrencyRate(completion: ((Result<Bool,Error>) -> ())? = nil) {
+    func fetchCurrencyRate(completion: ((Result<Bool,Error>) -> ())? = nil) {
         self.getCurrencyRate(for: base, amount: amount, completion: { result in
             switch result {
             case .success(let model):
@@ -55,14 +63,13 @@ class CurrencyConverterInteractor {
     }
   
     private func getCurrencyRate(for currency:String, amount: Double, completion: @escaping (Result<CurrencyRateNetworkModel,Error>) -> ()) {
-   // https://openexchangerates.org/api/latest.json?app_id=37e60c4ce41f454dbce1efe06609d8e8&base=usd&prettyprint=false&show_alternative=false
             let urlString = (self.url) + "latest.json?" + "app_id=\(self.appId)&base=\(currency)&amount=\(amount)"
             guard let url = URL(string: urlString) else {
                 completion(.failure(ApiError.badURL))
                 return
             }
             
-            URLSession.shared.dataTask(with: url) { data, response, error in
+        urlSession.dataTask(with: url) { data, response, error in
                 if let error = error as? URLError {
                     let urlError = ApiError.url(error)
                     completion(.failure(urlError))
@@ -74,6 +81,7 @@ class CurrencyConverterInteractor {
                         let response = try JSONDecoder().decode(CurrencyRateNetworkModel.self, from: data)
                         //if let data = self?.transform(networkResponse: response) {
                         completion(.success(response))
+                        //completion(.failure(ApiError.badURL))
                         //}
                     } catch {
                         let error =  ApiError.parsing(error as? DecodingError)
@@ -96,7 +104,7 @@ extension CurrencyConverterInteractor: CurrencyConverterInteractorProtocol {
             return
         }
         
-        URLSession.shared.dataTask(with: url) { data, response, error in
+        urlSession.dataTask(with: url) { data, response, error in
             if let error = error as? URLError {
                 let urlError = ApiError.url(error)
                 completion(.failure(urlError))
@@ -127,4 +135,55 @@ extension CurrencyConverterInteractor: CurrencyConverterInteractorProtocol {
             }
         }
      }
+}
+
+
+typealias DataTaskCompletionHandler = (Data?, URLResponse?, Error?) -> Void
+protocol URLSessionProtocol {
+  func dataTask(
+    with url: URL,
+    completionHandler: @escaping @Sendable (Data?, URLResponse?, Error?) -> Void
+  ) -> URLSessionDataTask
+}
+extension URLSession: URLSessionProtocol { }
+class URLSessionStub: URLSessionProtocol {
+    private let stubbedData: Data?
+    private let stubbedResponse: URLResponse?
+    private let stubbedError: Error?
+    public init(data: Data? = nil, response: URLResponse? = nil, error: Error? = nil) {
+        self.stubbedData = data
+        self.stubbedResponse = response
+        self.stubbedError = error
+    }
+    public func dataTask(
+        with url: URL,
+        completionHandler: @escaping DataTaskCompletionHandler
+    ) -> URLSessionDataTask {
+        URLSessionDataTaskStub(
+            stubbedData: stubbedData,
+            stubbedResponse: stubbedResponse,
+            stubbedError: stubbedError,
+            completionHandler: completionHandler
+        )
+    }
+}
+class URLSessionDataTaskStub: URLSessionDataTask {
+    private let stubbedData: Data?
+    private let stubbedResponse: URLResponse?
+    private let stubbedError: Error?
+    private let completionHandler: DataTaskCompletionHandler?
+    init(
+        stubbedData: Data? = nil,
+        stubbedResponse: URLResponse? = nil,
+        stubbedError: Error? = nil,
+        completionHandler: DataTaskCompletionHandler? = nil
+    ) {
+        self.stubbedData = stubbedData
+        self.stubbedResponse = stubbedResponse
+        self.stubbedError = stubbedError
+        self.completionHandler = completionHandler
+    }
+    override func resume() {
+        completionHandler?(stubbedData, stubbedResponse, stubbedError)
+    }
 }
